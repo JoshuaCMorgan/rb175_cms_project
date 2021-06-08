@@ -8,3 +8,4 @@ gem 'minitest-reporters', '~> 1.4.2'
 gem "sinatra-contrib"
 gem "erubis"
 gem "rake"
+gem "rack-test"

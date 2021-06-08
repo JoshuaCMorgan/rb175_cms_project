@@ -39,6 +39,7 @@ DEPENDENCIES
   erubis
   minitest (~> 5.13.0)
   minitest-reporters (~> 1.4.2)
+  rack-test
   rake
   sinatra (~> 1.4.7)
   sinatra-contrib
