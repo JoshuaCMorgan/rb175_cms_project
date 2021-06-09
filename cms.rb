@@ -1,6 +1,7 @@
 require "sinatra"
 require "sinatra/reloader"
-require "redcarpet"
+# require "redcarpet"
+
 configure do
   enable :sessions
   set :session_secret, 'secret'
@@ -14,10 +15,10 @@ before do
   end
 end
 
-# def render_markdown(text)
-#   markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
-#   markdown.render(text)
-# end
+def render_markdown(text)
+  markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
+  markdown.render(text)
+end
 
 def load_file_content(path)
   content = File.read(path)
@@ -25,8 +26,8 @@ def load_file_content(path)
   when ".txt"
     headers["Content-Type"] = "text/plain"
     content
-  # when ".md"
-  #   render_markdown(content)
+  when ".md"
+    render_markdown(content)
   end
 end
 
