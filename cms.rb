@@ -1,6 +1,6 @@
 require "sinatra"
 require "sinatra/reloader"
-# require "redcarpet"
+require "redcarpet"
 
 configure do
   enable :sessions
@@ -43,8 +43,7 @@ get "/:filename" do
   if File.file?(file_path)
     load_file_content(file_path)
   else
-    session[:message] = "#{params[:filename]} does not exit."
+    session[:message] = "#{params[:filename]} does not exist."
     redirect "/"
   end
 end
-

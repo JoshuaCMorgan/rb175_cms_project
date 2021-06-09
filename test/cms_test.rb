@@ -44,11 +44,10 @@ class CMSTest < Minitest::Test
     get last_response["Location"] # Request the page that the user was redirected to
    
     assert_equal(200, last_response.status)
-    assert_includes(last_response.body, "notafile.ext does not exist.")
+     assert_includes(last_response.body, "notafile.ext does not exist.")
 
     get "/" # reload the page
 
-    refute_includes(last_response.body, "notafile.ext does not exit") # refute that body includes error message // assert that our error message has been deleted.
-    # 
+    refute_includes(last_response.body, "notafile.ext does not exit") # refute that body includes error message, assert that our error message has been deleted. 
   end
 end
