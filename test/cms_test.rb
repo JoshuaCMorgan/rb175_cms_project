@@ -18,19 +18,19 @@ class CMSTest < Minitest::Test
   #validates the response contains the names of the three documents.
   def test_index
     get "/"
-
+    
     assert_equal(200, last_response.status)
     assert_equal("text/html;charset=utf-8", last_response["Content-Type"])
-    assert_includes(last_response.body, "about.txt")
+    assert_includes(last_response.body, "about.md")
     assert_includes(last_response.body, "changes.txt")
     assert_includes(last_response.body, "history.txt")
   end
-
+  
   # validates the response has a successful response
   # validates the response contains some text from a document.
   def test_viewing_text_document
     get "/history.txt"
-
+    
     assert_equal(200, last_response.status)
     assert_equal("text/plain", last_response["Content-Type"])
     assert_includes(last_response.body, "2018 - Ruby 2.6 released.")
