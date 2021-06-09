@@ -10,11 +10,8 @@ before do
 end
 
 
-
-
 # Display document titles
 get "/" do
-  p ENV.keys
   erb(:index)
 end
 
@@ -25,3 +22,4 @@ get "/:filename" do
   headers["Content-Type"] = "text/plain"
   File.read(file_path)
 end
+
