@@ -19,8 +19,8 @@ class CMSTest < Minitest::Test
   def test_index
     get "/"
 
-    assert_equal 200, last_response.status
-    assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
+    assert_equal(200, last_response.status)
+    assert_equal("text/html;charset=utf-8", last_response["Content-Type"])
     assert_includes(last_response.body, "about.txt")
     assert_includes(last_response.body, "changes.txt")
     assert_includes(last_response.body, "history.txt")
@@ -31,8 +31,24 @@ class CMSTest < Minitest::Test
   def test_viewing_text_document
     get "/history.txt"
 
-    assert_equal 200, last_response.status
-    assert_equal "text/plain", last_response["Content-Type"]
+    assert_equal(200, last_response.status)
+    assert_equal("text/plain", last_response["Content-Type"])
     assert_includes(last_response.body, "2018 - Ruby 2.6 released.")
+  end
+
+  def test_document_not_found
+    get "/notafile.ext" # attempt to access nonexistent file
+    
+    assert_equal(302, last_response.status) # assert that redirection was made by browser
+  
+    get last_response["Location"] # Request the page that the user was redirected to
+   
+    assert_equal(200, last_response.status)
+    assert_includes(last_response.body, "notafile.ext does not exist")
+
+    get "/" # reload the page
+
+    refute_includes(last_response.body, "notafile.ext does not exit") # refute that body includes error message // assert that our error message has been deleted.
+    # 
   end
 end
