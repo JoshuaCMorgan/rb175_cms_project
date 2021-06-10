@@ -1,17 +1,18 @@
 require "sinatra"
 require "sinatra/reloader"
-# require "redcarpet"
+ require "redcarpet"
 
 configure do
   enable :sessions
-  set :session_secret, 'secret'
+  set :session_secret, 'super secret'
 end
 
-before do
-  @root = File.expand_path("..", __FILE__)
 
-  @files = Dir.glob(@root + "/data/*").map do |path|
-    File.basename(path)
+def data_path  #  select a directory for data based on the environment the code is running in.
+  if ENV["RACK_ENV"] == "test"
+    File.expand_path("../test/data", __FILE__)
+  else
+    File.expand_path("../data", __FILE__)
   end
 end
 
@@ -33,12 +34,16 @@ end
 
 # Display document titles
 get "/" do
-  erb(:index)
+  pattern = File.join(data_path, "*")  # combines path segements using the correct path separator based on the current operating system.
+  @files = Dir.glob(pattern).map do |path|
+    File.basename(path)
+  end
+  erb :index
 end
 
 # View contents of document
 get "/:filename" do 
-  file_path = @root + "/data/" + params[:filename]
+  file_path = File.join(data_path, params[:filename])
 
   if File.file?(file_path)
     load_file_content(file_path)
@@ -49,19 +54,20 @@ get "/:filename" do
 end
 
 get "/:filename/edit" do
-  file_path = @root + "/data/" + params[:filename]
+  file_path = File.join(data_path, params[:filename])
+  
   @filename = params[:filename]
   @content = File.read(file_path)
+  
   erb(:edit)
 end
 
 post "/:filename" do
-  file_path = @root + "/data/" + params[:filename]
+  file_path = File.join(data_path, params[:filename])
 
   File.write(file_path, params[:content])
   session[:message] = "File was updated."
 
   redirect "/"
-
 end
 
