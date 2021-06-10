@@ -1,13 +1,12 @@
+# Setup our test environment
 ENV['RACK_ENV'] = "test" #prevents sinatra from starting a web server when testing
-
 require "minitest/autorun"
 require "rack/test"
-
+# Include our application
 require_relative "../cms.rb"
 
 class CMSTest < Minitest::Test
-  # This module gives us methods to work with
-  include Rack::Test::Methods
+  include Rack::Test::Methods  # This module gives us methods to work with
 
   # These methods expect a method called app to exist and return an instance of a Rack application when called.
   def app
@@ -44,10 +43,34 @@ class CMSTest < Minitest::Test
     get last_response["Location"] # Request the page that the user was redirected to
    
     assert_equal(200, last_response.status)
-     assert_includes(last_response.body, "notafile.ext does not exist.")
+    assert_includes(last_response.body, "notafile.ext does not exist.")
 
     get "/" # reload the page
 
     refute_includes(last_response.body, "notafile.ext does not exit") # refute that body includes error message, assert that our error message has been deleted. 
+  end
+
+  def test_editing_document
+    get "/changes.txt/edit" # access edit mode
+
+    assert_equal(200, last_response.status)
+    assert_includes(last_response.body, "<textarea")
+    assert_includes(last_response.body, %q(<button type="submit"))
+  end 
+
+  def test_updating_document
+    post "/changes.txt", content: "This is some text!"
+
+    assert_equal 302, last_response.status
+
+    get last_response["Location"] # Request the page that the user was redirected to
+   
+    assert_equal(200, last_response.status)
+    assert_includes(last_response.body, "File was updated.")
+
+    get "/changes.txt" # access the edited page
+
+    assert_includes(last_response.body, "This is some text!") # assert that our change to the document has persisted.
+
   end
 end
