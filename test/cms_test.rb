@@ -103,7 +103,39 @@ class CMSTest < Minitest::Test
 
     get "/changes.txt" # access the edited page
     
-    assert_equal 200, last_response.status
+    assert_equal(200, last_response.status)
     assert_includes(last_response.body, "This is some text!") # assert that our change to the document has persisted.
+  end
+
+  def test_new_document
+    get "/new"
+
+    assert_equal(200, last_response.status)
+    assert_includes(last_response.body, "Add a new")
+  end
+
+  def test_create_new_filename
+    post("/new", filename: "test.txt")
+
+    assert_equal(302, last_response.status)
+
+    get last_response["Location"] # Request the page that the user was redirected to
+   
+    assert_includes(last_response.body, "File was created.")
+  end
+
+  def test_invalid_new_filename
+    post("/new", filename: "")
+
+    assert_equal(302, last_response.status) 
+
+    get last_response["Location"] # Request the page that the user was redirected to
+   
+    assert_equal(200, last_response.status)
+    assert_includes(last_response.body, "A name is required.")
+
+    get "/" # reload the page
+
+    refute_includes(last_response.body, "A name is required.")
   end
 end

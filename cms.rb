@@ -38,10 +38,15 @@ get "/" do
   @files = Dir.glob(pattern).map do |path|
     File.basename(path)
   end
-  erb :index
+  erb(:index, layout: :layout)
 end
 
 # View contents of document
+get "/new" do
+ 
+  erb(:new)
+end
+
 get "/:filename" do 
   file_path = File.join(data_path, params[:filename])
 
@@ -59,8 +64,28 @@ get "/:filename/edit" do
   @filename = params[:filename]
   @content = File.read(file_path)
   
-  erb(:edit)
+  erb(:edit, layout: :layout)
 end
+
+
+
+post "/create" do
+  filename = params[:filename].to_s
+  
+  if filename.empty?
+    session[:message] = "A name is required."
+    status 422
+    erb :new
+  else
+    file_path = File.join(data_path, filename)
+
+    File.write(file_path, "hello")
+    session[:message] = "#{params[:filename]} has been created."
+
+    redirect "/"
+  end
+end
+
 
 post "/:filename" do
   file_path = File.join(data_path, params[:filename])
@@ -70,4 +95,3 @@ post "/:filename" do
 
   redirect "/"
 end
-
