@@ -95,8 +95,8 @@ post "/create" do
   
   if filename.empty?
     session[:message] = "A name is required."
-    status 422
-    erb :new
+    status(422)
+    erb(:new)
   else
     file_path = File.join(data_path, filename)
 
@@ -121,6 +121,6 @@ post "/:filename/delete" do
 
   File.delete(file_path)
 
-  session[:message] = "#{params[:filename]} was deleted."
+  session[:message] = "#{params[:filename]} has been deleted."
   redirect "/"
 end

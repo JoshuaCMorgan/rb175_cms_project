@@ -75,15 +75,7 @@ class CMSTest < Minitest::Test
     get "/notafile.ext" # attempt to access nonexistent file
     
     assert_equal(302, last_response.status) # assert that redirection was made by browser
-  
-    get last_response["Location"] # Request the page that the user was redirected to
-   
-    assert_equal(200, last_response.status)
-    assert_includes(last_response.body, "notafile.ext does not exist.")
-
-    get "/" # reload the page
-
-    refute_includes(last_response.body, "notafile.ext does not exit") # refute that body includes error message, assert that our error message has been deleted. 
+    assert_equal("notafile.ext does not exist.", session[:message])
   end
 
 
@@ -102,9 +94,7 @@ class CMSTest < Minitest::Test
 
     assert_equal(302, last_response.status)
 
-    get last_response["Location"] # Request the page that the user was redirected to
-   
-    assert_includes(last_response.body, "File was updated.")
+    assert_equal("File was updated.", session[:message])
 
     get "/changes.txt" # access the edited page
     
@@ -120,35 +110,32 @@ class CMSTest < Minitest::Test
     assert_includes(last_response.body, %q(<button type="submit"))
   end
 
+  
+  def test_create_new_document_without_filename
+    post("/create", filename: "")
+    assert_equal(422, last_response.status)
+    assert_includes(last_response.body, "A name is required")
+  end
+  
   def test_create_new_document
     post "/create", filename: "test.txt"
     assert_equal(302, last_response.status)
 
-    get last_response["Location"]
-    assert_includes(last_response.body, "test.txt has been created")
+    assert_equal("test.txt has been created.", session[:message])
 
     get "/"
     assert_includes(last_response.body, "test.txt")
   end
 
-  def test_create_new_document_without_filename
-    post( "/create", filename: "")
-    assert_equal(422, last_response.status)
-    assert_includes(last_response.body, "A name is required")
-  end
-
   def test_deleted_file
     create_document("test.txt")
     post("/test.txt/delete")
-
+    
     assert_equal(302, last_response.status)
-
-    get last_response["Location"] # Request the page that the user was redirected to
-   
-    assert_includes(last_response.body, "test.txt was deleted.")
-
-    get "/"
-
-    refute_includes(last_response.body, "test.txt")
+    assert_equal("test.txt has been deleted.", session[:message])
+  
+     get "/"
+     
+    refute_includes(last_response.body, %q(<a href="/test.txt"</a>))
   end
 end
