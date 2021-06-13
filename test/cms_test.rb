@@ -29,6 +29,11 @@ class CMSTest < Minitest::Test
     end
   end
 
+  ## get at the session object and its values
+  def session
+    last_request.env["rack.session"]
+  end
+
   #validates the response has a successful response 
   #validates the response contains the names of two documents.
   def test_index
@@ -61,7 +66,7 @@ class CMSTest < Minitest::Test
 
     get "/about.md"
 
-    assert_equal 200, last_response.status
+    assert_equal(200, last_response.status)
     assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
     assert_includes last_response.body, "<h1>Ruby is...</h1>"
   end
@@ -95,7 +100,7 @@ class CMSTest < Minitest::Test
   def test_updating_document
     post "/changes.txt", content: "This is some text!"
 
-    assert_equal 302, last_response.status
+    assert_equal(302, last_response.status)
 
     get last_response["Location"] # Request the page that the user was redirected to
    
@@ -107,35 +112,43 @@ class CMSTest < Minitest::Test
     assert_includes(last_response.body, "This is some text!") # assert that our change to the document has persisted.
   end
 
-  def test_new_document
+  def test_view_new_document_form
     get "/new"
 
     assert_equal(200, last_response.status)
-    assert_includes(last_response.body, "Add a new")
+    assert_includes(last_response.body, "<input")
+    assert_includes(last_response.body, %q(<button type="submit"))
   end
 
-  def test_create_new_filename
-    post("/new", filename: "test.txt")
+  def test_create_new_document
+    post "/create", filename: "test.txt"
+    assert_equal(302, last_response.status)
+
+    get last_response["Location"]
+    assert_includes(last_response.body, "test.txt has been created")
+
+    get "/"
+    assert_includes(last_response.body, "test.txt")
+  end
+
+  def test_create_new_document_without_filename
+    post( "/create", filename: "")
+    assert_equal(422, last_response.status)
+    assert_includes(last_response.body, "A name is required")
+  end
+
+  def test_deleted_file
+    create_document("test.txt")
+    post("/test.txt/delete")
 
     assert_equal(302, last_response.status)
 
     get last_response["Location"] # Request the page that the user was redirected to
    
-    assert_includes(last_response.body, "File was created.")
-  end
+    assert_includes(last_response.body, "test.txt was deleted.")
 
-  def test_invalid_new_filename
-    post("/new", filename: "")
+    get "/"
 
-    assert_equal(302, last_response.status) 
-
-    get last_response["Location"] # Request the page that the user was redirected to
-   
-    assert_equal(200, last_response.status)
-    assert_includes(last_response.body, "A name is required.")
-
-    get "/" # reload the page
-
-    refute_includes(last_response.body, "A name is required.")
+    refute_includes(last_response.body, "test.txt")
   end
 end

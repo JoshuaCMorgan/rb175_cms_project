@@ -7,3 +7,81 @@ body {
   padding: 10px;
   background: #FFFF99;
 }
+
+form.inline {
+  display: inline;
+}
+
+.userstatus {
+  font-style: italic;
+  font-size: .9em;
+}
+
+.styled-form * {
+  margin: 0;
+  padding: 0;
+}
+
+.styled-form fieldset {
+  background-color: #ececec;
+  border: 2px solid #999;
+  box-sizing: border-box;
+  color: #4d4d4d;
+  font-family: "Helvetica Neue", Helvetica, Roboto,
+    Arial, sans-serif;
+  padding: 1rem;
+}
+
+.styled-form label {
+  font-weight: bold;
+  line-height: 1.5rem;
+}
+
+.styled-form input {
+  border: 1px solid #06c;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font: normal 1rem Helvetica, Arial, sans-serif;
+  height: 40px;
+  padding: 5px 8px;
+}
+
+.side-by-side label,
+.side-by-side input {
+  display: inline-block;
+}
+
+.side-by-side label {
+  margin-right: 1rem;
+  vertical-align: middle;
+}
+
+.side-by-side input {
+  vertical-align: middle;
+  width: 50%;
+}
+.side-by-side dl {
+  font-size: 0;
+}
+
+.side-by-side dt,
+.side-by-side dd {
+  box-sizing: border-box;
+  display: inline-block;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+.side-by-side dt {
+  padding-right: 1rem;
+  width: 12%;
+}
+
+.side-by-side dd {
+  width: 85%;
+}
+
+.btn {
+  padding: 5px 8px;
+  background-color: white;
+}
