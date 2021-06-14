@@ -51,7 +51,7 @@ get "/users/signin" do
 end
 
 # signin admin, return all others to signin.
-post "/user/signin" do
+post "/users/signin" do
   if params[:username] == "admin" && params[:password] == "secret"
     session[:username] = params[:username]
     session[:message] = "Welcome!"

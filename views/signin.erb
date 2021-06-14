@@ -1,12 +1,12 @@
-<form class="styled-form side-by-side" action="/user/signin" method="post">
-<fieldset>
-  <dl>
-    <dt><label for="username">Username</label></dt>
-    <dd><input type="text" name="username" value="<% params[:username] %>"/></dd>
- 
-    <dt><label for="password">Password </label></dt>
-    <dd><input type="password" name="password"  value="<% params[:password] %>" /></dt>
-  </dl>
-  <button name="Sign In"class="btn" >Sign In</button>
+<form class="styled-form side-by-side" action="/users/signin" method="post">
+  <fieldset>
+    <dl>
+      <dt><label for="username">Username</label></dt>
+      <dd><input id="username" name="username" value="<% params[:username] %>"/></dd>
+  
+      <dt><label for="password">Password </label></dt>
+      <dd><input type="password" id="password" name="password"  value="<% params[:password] %>" /></dt>
+    </dl>
+    <button type="submit" class="btn" >Sign In</button>
   </fieldset>
 </form>

@@ -75,7 +75,7 @@ class CMSTest < Minitest::Test
     get "/notafile.ext" # attempt to access nonexistent file
     
     assert_equal(302, last_response.status) # assert that redirection was made by browser
-    assert_equal("notafile.ext does not exist.", session[:message])
+    assert_equal("notafile.ext does not exist.", last_request.env["rack.session"][:message])
   end
 
 
@@ -138,4 +138,65 @@ class CMSTest < Minitest::Test
      
     refute_includes(last_response.body, %q(<a href="/test.txt"</a>))
   end
+
+  def test_signin_form
+    get "/users/signin"
+    
+    assert_equal(200, last_response.status)
+    assert_includes(last_response.body, "<input")
+    assert_includes(last_response.body, %q(<button type="submit"))
+  end
+
+  def test_signin_proper
+    post "/users/signin", username: "admin", password: "secret"
+
+    assert_equal(302, last_response.status)
+    assert_equal("Welcome!", session[:message])
+    assert_equal("admin", session[:username])
+
+    get last_response["Location"]
+   
+    assert_includes(last_response.body, "Signed in as admin")
+  end
+
+  def test_sigin_with_bad_credentials
+    post "/users/signin", username: "invalid", password: "abcd"
+
+    assert_equal(402, last_response.status)
+    assert_nil(last_request.env["rack.session"][:username])
+    assert_includes(last_response.body, "Invalid Credentials")
+  end
+
+  def test_signin_with_bad_creds
+    get "/", {}, {"rack.session" => { username: "pands" } }
+
+  end
+
+  # def test_signout
+  #   post "/users/signin", username: "admin", password: "secret"
+  #   assert_equal("Welcome!", session[:message])
+
+  #   post "/users/signout", username: "admin", password: "secret"
+  #   assert_equal(302, last_response.status)
+  #   assert_equal("You have been signed out.", session[:message])
+    
+  #   get last_response["Location"]
+  #   assert_includes(last_response.body, "Sign In")
+  #   refute_includes(last_response.body, "Signed in as admin")
+  # end
+
+  def test_signout
+    get "/", {}, {"rack.session" => { username: "admin" } }
+    assert_includes last_response.body, "Signed in as admin"
+
+    post "/users/signout"
+    assert_equal "You have been signed out.", session[:message]
+
+    get last_response["Location"]
+    assert_nil session[:username]
+    assert_includes last_response.body, "Sign In"
+  end
 end
+
+
+
