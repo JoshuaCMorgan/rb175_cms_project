@@ -65,6 +65,28 @@ def require_signed_in_user
     redirect "/"
   end
 end
+
+def username_invalid?(username)
+  credentials = load_user_credentials
+
+  if credentials.key?(username)
+    "Username already exists."
+  elsif username.size < 3
+    "Username is too short, needs to be at least 3 letters."
+  end
+end
+
+def password_invalid?(pw)
+  "Password needs to be at least 8 characters long." if  pw.size < 8
+end
+
+def add_user_to_configuration(users)
+  file_path = File.join(configuration_path, "users.yml")
+  test_file_path = File.join(configuration_path, "test/users.yml")
+  File.write(file_path, users.to_yaml)
+  File.write(test_file_path, users.to_yaml)
+end
+
 # Display document titles
 get "/" do
   pattern = File.join(data_path, "*")  # combines path segements using the correct path separator based on the current operating system.
@@ -140,6 +162,34 @@ get "/:filename/edit" do
   @content = File.read(file_path)
   
   erb(:edit, layout: :layout)
+end
+
+get "/users/signup" do
+  erb(:signup)
+end
+
+
+post "/users/create_user" do 
+  username = params[:username]
+  password = params[:password]
+
+  error = username_invalid?(username) || password_invalid?(password)
+
+  if error
+    session[:message] = error
+    status 422
+    erb :signup
+  else 
+    credentials = load_user_credentials
+    hash_password = BCrypt::Password.create(password)
+    credentials[username] = hash_password.to_s
+
+    add_user_to_configuration(credentials)
+
+    session[:message] = "You have signed up successfully. You may now sign in."
+    session[:user] = username
+    redirect "/"
+  end
 end
 
 post "/create" do

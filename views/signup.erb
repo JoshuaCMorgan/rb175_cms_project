@@ -1,0 +1,13 @@
+<form class="styled-form side-by-side" method="post" action="/users/create_user">
+  <fieldset>
+    <label>Please choose a username and password</label>
+      <dl>
+        <dt><label for="username">Username:</label></dt>
+        <dd><input id="username" name="username" value="<%= params[:username]  %>" /></dd>
+
+        <dt><label for="password">Password </label></dt>
+        <dd><input type="password" id="password" name="password" /></dt>
+      </dl>
+    <button type="submit" class="btn">Sign Up</button>
+  </fieldset>
+</form>

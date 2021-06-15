@@ -22,5 +22,8 @@
     </p>
   </form>
 <% else %>
-  <p class="userstatus"><a href="/users/signin">Sign In</a></p>
+  <p class="userstatus">
+    <a href="/users/signin">Sign In</a> <%= " | " %>
+    <a href="/users/signup">Sign Up</a>
+  </p>
 <% end %>

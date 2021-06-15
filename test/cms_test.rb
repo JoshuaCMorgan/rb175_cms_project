@@ -144,8 +144,7 @@ class CMSTest < Minitest::Test
     assert_equal(302, last_response.status)
     assert_equal("You must be signed in to do that.", session[:message])
   end
-
-  
+ 
   def test_create_new_document_without_filename
     post "/create", {filename: ""}, admin_session
 
