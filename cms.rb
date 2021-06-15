@@ -102,7 +102,7 @@ post "/users/signin" do
   credentials = load_user_credentials
   username = params[:username]
 
-  if valid_credentials(username, params[:password])
+  if valid_credentials?(username, params[:password])
     session[:username] = username
     session[:message] = "Welcome!"
     redirect "/"
