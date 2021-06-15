@@ -204,36 +204,48 @@ class CMSTest < Minitest::Test
   def test_sigin_with_bad_credentials
     post "/users/signin", username: "invalid", password: "abcd"
 
-    assert_equal(402, last_response.status)
+    assert_equal(422, last_response.status)
     assert_nil(last_request.env["rack.session"][:username])
-    assert_includes(last_response.body, "Invalid Credentials")
+    assert_includes(last_response.body, "Invalid credentials")
   end
-
-  # def test_signout
-  #   post "/users/signin", username: "admin", password: "secret"
-  #   assert_equal("Welcome!", session[:message])
-
-  #   post "/users/signout", username: "admin", password: "secret"
-  #   assert_equal(302, last_response.status)
-  #   assert_equal("You have been signed out.", session[:message])
-    
-  #   get last_response["Location"]
-  #   assert_includes(last_response.body, "Sign In")
-  #   refute_includes(last_response.body, "Signed in as admin")
-  # end
 
   def test_signout
     get "/", {}, {"rack.session" => { username: "admin" } }
     assert_includes last_response.body, "Signed in as admin"
-
+    
     post "/users/signout"
     assert_equal "You have been signed out.", session[:message]
+    
+    get last_response["Location"]
+    assert_nil session[:username]
+    assert_includes last_response.body, "Sign In"
+  end
 
+  def test_signout_non_admin
+    get "/", {}, {"rack.session" => { username: "josh" } }
+    assert_includes last_response.body, "Signed in as josh"
+    
+    post "/users/signout"
+    assert_equal "You have been signed out.", session[:message]
+    
     get last_response["Location"]
     assert_nil session[:username]
     assert_includes last_response.body, "Sign In"
   end
 end
+
+# def test_signout
+#   post "/users/signin", username: "admin", password: "secret"
+#   assert_equal("Welcome!", session[:message])
+
+#   post "/users/signout", username: "admin", password: "secret"
+#   assert_equal(302, last_response.status)
+#   assert_equal("You have been signed out.", session[:message])
+  
+#   get last_response["Location"]
+#   assert_includes(last_response.body, "Sign In")
+#   refute_includes(last_response.body, "Signed in as admin")
+# end
 
 
 
