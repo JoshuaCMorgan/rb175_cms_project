@@ -2,6 +2,7 @@ require "sinatra"
 require "sinatra/reloader"
 require "redcarpet"
 require "yaml"
+require "bcrypt"
 
 configure do
   enable :sessions
@@ -84,12 +85,24 @@ get "/users/signin" do
   erb(:signin)
 end
 
+def valid_credentials?(username, password)
+  credentials = load_user_credentials
+
+  # give current user an already generated encrypted password
+  if credentials.key?(username)
+    bcrypt_password = BCrypt::Password.new(credentials[username])
+    bcrypt_password == password # check if encrypted password and users's password same
+  else
+    false
+  end
+end
+
 # signin admin and those authorized, return all others to signin.
 post "/users/signin" do
   credentials = load_user_credentials
   username = params[:username]
 
-  if credentials.key?(username) && credentials[username] == params[:password]
+  if valid_credentials(username, params[:password])
     session[:username] = username
     session[:message] = "Welcome!"
     redirect "/"

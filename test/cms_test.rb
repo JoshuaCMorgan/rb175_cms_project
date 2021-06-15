@@ -1,5 +1,6 @@
 # Setup our test environment
 ENV['RACK_ENV'] = "test" #prevents sinatra from starting a web server when testing
+
 require 'fileutils'
 require "minitest/autorun"
 require "rack/test"

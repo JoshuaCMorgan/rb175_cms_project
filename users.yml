@@ -1,5 +1,6 @@
 # username: password
 {
-  josh: joshpass,
-  karen: karenpass,
+  admin: "$2a$12$pvtX5Gf2ZloWTIDoet0PmOceo5dwiiC33sQzMpOAGtn8YHzyXJeVi",
+  josh: "$2a$12$czHyML3JB6BcJ3Avh0WVbeQt9wEK0pcVvErEIvRAjlZDoatWo2GPe",
+  karen: "$2a$12$qVTPr9MgZ9ivxIJLBH8VeuETycMbMCJ3Oem0ltRWTi4LAKsx5.qsu",
 }
