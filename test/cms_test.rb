@@ -9,7 +9,7 @@ require_relative "../cms.rb"
 class CMSTest < Minitest::Test
   include Rack::Test::Methods  # This module gives us methods to work with
 
-  # These methods expect a method called app to exist and return an instance of a Rack application when called.
+  # These methods expect a method called app to exist and will return an instance of a Rack application when called.
   def app
     Sinatra::Application
   end
@@ -34,6 +34,13 @@ class CMSTest < Minitest::Test
     last_request.env["rack.session"]
   end
 
+  def admin_session
+    # By passing a value for the session, we can skip right to testing
+  # functionality that requires being signed in. The second argument is
+  # an empty hash because we aren't passing any params to the request.
+    { "rack.session" => { username: "admin" } }
+  end 
+  
   #validates the response has a successful response 
   #validates the response contains the names of two documents.
   def test_index
@@ -79,21 +86,41 @@ class CMSTest < Minitest::Test
   end
 
 
-  def test_editing_document
+  def test_editing_document # verify admin access edit mode
     create_document("changes.txt")
 
-    get "/changes.txt/edit" # access edit mode
+    get "/changes.txt/edit", {}, admin_session 
 
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, "<textarea")
     assert_includes(last_response.body, %q(<button type="submit"))
   end 
 
-  def test_updating_document
-    post "/changes.txt", content: "This is some text!"
+
+  def test_editing_document_by_admin_only
+    create_document("changes.txt")
+    # Submit the sign in form &
+    # Verify that the user is signed in by testing something that required being signed in
+    get "changes.txt/edit", {}, admin_session
+    
+    assert_equal(200, last_response.status)
+    assert_includes(last_response.body, "Edit content of")
+    assert_includes(last_response.body, %q(<button type="submit">))
+  end
+
+  def test_editing_document_signed_out
+    create_document("changes.txt")
+
+    get "changes.txt/edit"
 
     assert_equal(302, last_response.status)
+    assert_equal("You must be signed in to do that.", session[:message])
+  end
 
+  def test_updating_document_occurred
+    post "/changes.txt", {content: "This is some text!"}, admin_session
+    
+    assert_equal(302, last_response.status)
     assert_equal("File was updated.", session[:message])
 
     get "/changes.txt" # access the edited page
@@ -103,33 +130,48 @@ class CMSTest < Minitest::Test
   end
 
   def test_view_new_document_form
-    get "/new"
+    get "/new", {}, admin_session
 
     assert_equal(200, last_response.status)
     assert_includes(last_response.body, "<input")
     assert_includes(last_response.body, %q(<button type="submit"))
   end
 
+  def test_view_new_document_signed_out
+    get "/new"
+
+    assert_equal(302, last_response.status)
+    assert_equal("You must be signed in to do that.", session[:message])
+  end
+
   
   def test_create_new_document_without_filename
-    post("/create", filename: "")
+    post "/create", {filename: ""}, admin_session
+
     assert_equal(422, last_response.status)
     assert_includes(last_response.body, "A name is required")
   end
   
   def test_create_new_document
-    post "/create", filename: "test.txt"
+    post "/create", {filename: "test.txt"}, admin_session
+   
     assert_equal(302, last_response.status)
-
     assert_equal("test.txt has been created.", session[:message])
 
     get "/"
     assert_includes(last_response.body, "test.txt")
   end
 
+  def test_create_new_document_signed_out
+    post "/create", {filename: "test.txt"}
+
+    assert_equal(302, last_response.status)
+    assert_equal("You must be signed in to do that.", session[:message])
+  end
+
   def test_deleted_file
     create_document("test.txt")
-    post("/test.txt/delete")
+    post "/test.txt/delete", {}, admin_session
     
     assert_equal(302, last_response.status)
     assert_equal("test.txt has been deleted.", session[:message])
@@ -165,11 +207,6 @@ class CMSTest < Minitest::Test
     assert_equal(402, last_response.status)
     assert_nil(last_request.env["rack.session"][:username])
     assert_includes(last_response.body, "Invalid Credentials")
-  end
-
-  def test_signin_with_bad_creds
-    get "/", {}, {"rack.session" => { username: "pands" } }
-
   end
 
   # def test_signout
