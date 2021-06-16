@@ -4,8 +4,9 @@ require "redcarpet"
 require "yaml"
 require "bcrypt"
 
+
 configure do
-  enable :sessions
+  enable :sessions  #Enable sessions in the application so we can persist data between requests. 
   set :session_secret, 'super secret'
 end
 
@@ -44,7 +45,7 @@ def render_markdown(text)
   markdown.render(text)
 end
 
-def load_file_content(path)
+def load_file_content(path) # return nil if not proper extention(helps with security)
   content = File.read(path)
   case File.extname(path)
   when ".txt"
@@ -80,6 +81,18 @@ def password_invalid?(pw)
   "Password needs to be at least 8 characters long." if  pw.size < 8
 end
 
+def valid_credentials?(username, password)
+  credentials = load_user_credentials
+
+  # give current user an already generated encrypted password
+  if credentials.key?(username)
+    bcrypt_password = BCrypt::Password.new(credentials[username])
+    bcrypt_password == password # check if encrypted password and users's password same
+  else
+    false
+  end
+end
+
 def add_user_to_configuration(users)
   file_path = File.join(configuration_path, "users.yml")
   test_file_path = File.join(configuration_path, "test/users.yml")
@@ -89,6 +102,7 @@ end
 
 # Display document titles
 get "/" do
+  binding.pry
   pattern = File.join(data_path, "*")  # combines path segements using the correct path separator based on the current operating system.
   @files = Dir.glob(pattern).map do |path|
     File.basename(path)
@@ -107,17 +121,6 @@ get "/users/signin" do
   erb(:signin)
 end
 
-def valid_credentials?(username, password)
-  credentials = load_user_credentials
-
-  # give current user an already generated encrypted password
-  if credentials.key?(username)
-    bcrypt_password = BCrypt::Password.new(credentials[username])
-    bcrypt_password == password # check if encrypted password and users's password same
-  else
-    false
-  end
-end
 
 # signin admin and those authorized, return all others to signin.
 post "/users/signin" do
@@ -130,7 +133,7 @@ post "/users/signin" do
     redirect "/"
   else
     session[:message] = "Invalid credentials"
-    status 422
+    status 422  # Unprocessable Entity
     erb :signin
   end
 end

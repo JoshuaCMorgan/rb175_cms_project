@@ -176,7 +176,7 @@ class CMSTest < Minitest::Test
     assert_equal(302, last_response.status)
     assert_equal("test.txt has been deleted.", session[:message])
   
-     get "/"
+     get "/"  # refresh page
      
     refute_includes(last_response.body, %q(<a href="/test.txt"</a>))
   end
