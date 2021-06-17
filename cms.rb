@@ -87,7 +87,7 @@ def valid_credentials?(username, password)
   # give current user an already generated encrypted password
   if credentials.key?(username)
     bcrypt_password = BCrypt::Password.new(credentials[username])
-    bcrypt_password == password # check if encrypted password and users's password same
+     bcrypt_password == password# check if encrypted password and users's password same
   else
     false
   end
@@ -102,7 +102,6 @@ end
 
 # Display document titles
 get "/" do
-  binding.pry
   pattern = File.join(data_path, "*")  # combines path segements using the correct path separator based on the current operating system.
   @files = Dir.glob(pattern).map do |path|
     File.basename(path)
